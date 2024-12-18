@@ -1,12 +1,3 @@
-resources:
- pipelines:
-   - pipeline: azure_ci_yml
-     source: azure_cicd_transformers
-     trigger:
-       branches:
-         include:
-           - main
-
 
 jobs:
  - job: DeployStreamlitApp
@@ -79,8 +70,8 @@ jobs:
 
            # Set variables
            endpoint_name="streamlit-endpoint"
-           model_name="transformer_cicd"
-           model_version="16"
+           #model_name="transformer_cicd"
+           #model_version="16"
                 #"azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
            environment_name="azureml:env_cicd3:1"       #"azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/environments/env_cicd2/versions/1"
            #docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
@@ -108,7 +99,8 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
+             path: azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/models/transformer_cicd/versions/19
+             #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
