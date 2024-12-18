@@ -83,6 +83,7 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            # Ensure the correct version of the Azure ML extension is installed
+           source venv/bin/activate
            az extension remove -n azure-cli-ml || true
            az extension add -n ml --version=2.25.0 --allow-preview
 
@@ -94,6 +95,7 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            # Create the Azure ML Workspace
+           source venv/bin/activate
            az ml workspace create \
              --resource-group $(ml.resourceGroup) \
              --name $(ml.workspace) \
@@ -107,6 +109,7 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            # Create Compute Target
+           source venv/bin/activate
            az ml compute create \
              --name $(ml.computeName) \
              --type amlcompute \
@@ -121,6 +124,7 @@ jobs:
          scriptType: 'bash'
          scriptLocation: 'inlineScript'
          inlineScript: |
+           source venv/bin/activate
            az ml job list \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace)
@@ -143,6 +147,7 @@ jobs:
          scriptType: 'bash'
          scriptLocation: 'inlineScript'
          inlineScript: |
+           source venv/bin/activate
            az ml model create \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
