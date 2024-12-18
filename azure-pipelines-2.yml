@@ -99,8 +99,8 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/models/model_for_deployment/versions/1 #azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/models/transformer_cicd/versions/19
-             #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
+             path: azureml:/subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/providers/Microsoft.MachineLearningServices/workspaces/my-ml-workspace/models/transformer_cicd/versions/19
+             
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
