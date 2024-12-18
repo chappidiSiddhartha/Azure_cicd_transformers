@@ -1,0 +1,11 @@
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - streamlit
+  - transformers
+  - pytorch
+  - pip
+  - pip:
+      - torch
+name: myenv

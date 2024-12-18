@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+name: streamlit-deployment
+endpoint_name: streamlit-endpoint
+model:
+  name: transformer_cicd  # Name of your model in Azure ML
+  version: 16  # Version of your model
+code_configuration:
+  code: ./  # Path to your application code
+  scoring_script: score.py  # Entry point of your Streamlit app
+environment: 
+  conda_file: conda_dependancies.yml  # Path to the Conda environment file
+instance_type: ACI  # Use Azure Container Instances
+instance_count: 1  # Number of instances
+containerResourceRequirements:
+  cpu: 1  # CPU allocation
+  memoryInGB: 0.5  # Memory allocation

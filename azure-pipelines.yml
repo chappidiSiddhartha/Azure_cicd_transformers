@@ -1,0 +1,147 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+  - job: InstallAndSetup
+    displayName: 'Install Dependencies and Setup Azure ML Environment'
+    steps:
+      - task: Bash@3
+        displayName: 'Create and Activate Virtual Environment'
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Create a virtual environment
+            python3 -m venv venv
+
+            # Activate the virtual environment
+            source venv/bin/activate
+
+            # Upgrade pip in the virtual environment
+            pip install --upgrade pip
+            pip install ruamel.yaml 
+            pip install transformers
+            pip install streamlit
+            pip install azureml-sdk
+
+            # Check Python version
+            python --version
+
+      - task: UsePythonVersion@0
+        displayName: 'Install Python 3.12'
+        inputs:
+          versionSpec: '3.12.4'
+          addToPath: true
+          architecture: 'x64'
+
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Remove conflicting Azure CLI extensions (azure-cli-ml and ml)
+            source venv/bin/activate
+            az extension remove -n azure-cli-ml || true
+            az extension remove -n ml || true
+
+            # Install the required Azure ML extension with a specific version
+            az extension add -n ml --version=2.25.0 --allow-preview
+
+            # Install specific version of Azure CLI
+            pip install azure-cli==2.20.0
+
+            # Upgrade Azure ML SDK
+            pip install --upgrade azureml-sdk[cli]
+
+            # Install pytest and pytest-cov for testing
+            pip install pytest pytest-cov
+            pip install streamlit transformers torch
+
+            # Install dependencies from requirements.txt
+            #pip install -r requirements.txt
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            # Ensure the correct version of the Azure ML extension is installed
+            az extension remove -n azure-cli-ml || true
+            az extension add -n ml --version=2.25.0 --allow-preview
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            # Create the Azure ML Workspace
+            az ml workspace create \
+              --resource-group $(ml.resourceGroup) \
+              --name $(ml.workspace) \
+              --location $(ml.region)
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            # Create Compute Target
+            az ml compute create \
+              --name $(ml.computeName) \
+              --type amlcompute \
+              --resource-group $(ml.resourceGroup) \
+              --workspace-name $(ml.workspace) \
+              --size $(ml.computeVMSize)
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az ml job list \
+              -g $(ml.resourceGroup) \
+              -w $(ml.workspace)
+
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            source venv/bin/activate
+            python3 app2.py \
+              --experiment_name $(ml.experimentName) \
+              --container_name cicd_transformers \
+              --artifact_loc ./outputs/models/
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az ml model create \
+              -g $(ml.resourceGroup) \
+              -w $(ml.workspace) \
+              --name transformer_cicd \
+              --path ./outputs/models/ \
+              --tag "model"="Transformer"
+
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          Contents: |
+            app2.py
+            requirements.txt
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifact: 'PipelineArtifacts'
+
