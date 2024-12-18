@@ -99,7 +99,7 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: azureml:/subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/providers/Microsoft.MachineLearningServices/workspaces/my-ml-workspace/models/transformer_cicd/versions/19
+             path: outputs/models/   #azureml:/subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/providers/Microsoft.MachineLearningServices/workspaces/my-ml-workspace/models/transformer_cicd/versions/19
              
            code_configuration:
              code: ./  # Path to your application code
