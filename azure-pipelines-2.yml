@@ -1,6 +1,6 @@
 resources:
  pipelines:
-   - pipeline: transformers_cicd
+   - pipeline: azure_ci_yml
      source: azure_cicd_transformers
      trigger:
        branches:
