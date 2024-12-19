@@ -57,7 +57,7 @@ jobs:
 
            # Install the required Azure ML extension with a specific version
            az extension add -n ml --version=2.25.0 --allow-preview
-
+           az extension update -n ml
            pip uninstall -y azure-cli==2.20.0
 
            # Install specific version of Azure CLI
