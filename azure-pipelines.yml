@@ -143,10 +143,10 @@ jobs:
          scriptType: 'bash'
          scriptLocation: 'inlineScript'
          inlineScript: |
-           az ml model create \
+           az ml model register \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
-             --name transformer_cicd \
+             --name transformer_cicd1 \
              --path ./outputs/models/ \
              --tag "model"="Transformer"
 
