@@ -16,24 +16,6 @@ jobs:
 
 
      # Install required dependencies and Azure CLI tools
-     - task: Bash@3
-       inputs:
-         targetType: 'inline'
-         script: |
-           python -m venv venv
-           source venv/bin/activate
-           pip install --upgrade pip
-           pip install azure-cli azureml-sdk[cli]
-           # Install specific version of Azure CLI
-           pip install azure-cli==2.20.0
-
-
-           # Upgrade Azure ML SDK
-           pip install ruamel.yaml
-           # Install pytest and pytest-cov for testing
-           pip install pytest pytest-cov
-           pip install streamlit transformers torch
-
 
      # Authenticate with Azure and create the endpoint
      - task: AzureCLI@2
@@ -42,7 +24,8 @@ jobs:
          scriptType: 'bash'
          scriptLocation: 'inlineScript'
          inlineScript: |
-           source venv/bin/activate
+          python -m venv venv 
+          source venv/bin/activate
            az extension add -n ml --version 2.25.0 --allow-preview
            # Set variables for your storage account and container
             STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
@@ -139,7 +122,7 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             name: model_archive.tar.gz
+             path : pwd
              unpack: true
            code_configuration:
              code: ./  # Path to your application code
