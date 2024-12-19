@@ -76,22 +76,16 @@ jobs:
             # Create the deploy.yml file dynamically
             echo "Creating deploy.yml file..."
             cat <<EOF > ./deploy.yml
-            \$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-            command: >-
-              python $scoring_script
+            \$schema: https://azuremlschemas.azureedge.net/latest/onlineEndpoint.schema.json
+            compute: $instance_type
             name: streamlit-deployment
+            code_configuration:
+              code: ./
+              scoring_script: $scoring_script
             environment:
               conda_file: conda.yaml
               image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
-            code: ./  # Path to the application code directory
-            inputs:
-              model_path:
-                type: uri_folder
-                path: $model_path
-            resources:
-              instance_count: $instance_count
-              ports:
-                - "8501"
+
             EOF
 
             # Output message to show the generated file
@@ -99,7 +93,7 @@ jobs:
 
             # Submit the job using az ml job create
             echo "Submitting the job using az ml job create..."
-            az ml job create --file ./deploy.yml \
+            az ml online-endpoint create  --file ./deploy.yml \
               --resource-group my-ml-resource-group \
               --workspace-name my-ml-workspace
 
