@@ -17,6 +17,18 @@ jobs:
           versionSpec: '3.12.4'
           addToPath: true
           architecture: 'x64'
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "Current working directory:"
+            pwd
+            echo "Listing files in the current directory:"
+            ls -l
+            python3 ./run app2.py \
+              --experiment_name $(ml.experimentName) \
+              --container_name cicd_transformers \
+              --artifact_loc ./outputs/models/
 
       - task: Bash@3
         displayName: 'Create and Activate Virtual Environment'
