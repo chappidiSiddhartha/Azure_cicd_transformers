@@ -60,7 +60,7 @@ jobs:
 
 
            # Install specific version of Azure CLI
-           pip install azure-cli==2.20.0
+           pip install azure-cli==2.30.1
 
 
            # Upgrade Azure ML SDK
