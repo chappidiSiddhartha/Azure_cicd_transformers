@@ -45,7 +45,7 @@ jobs:
               --resource-group $(ml.resourceGroup) \
               --workspace-name $(ml.workspace)
 
-      - task: AzureCLI@2
+     
 
       - task: AzureCLI@2
         inputs:
