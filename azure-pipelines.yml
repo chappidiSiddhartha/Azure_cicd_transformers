@@ -45,7 +45,7 @@ jobs:
             echo "Listing all files and folders in the venv directory:"
             ls -R venv
             # Locate utils.py in the Azure ML SDK installation
-            UTILS_FILE=$(find venv -type f -name "utils.py" | grep "azureml/_base_sdk_common")
+            UTILS_FILE=$(find venv/lib/python3.12/site-packages -type f -name "utils.py" | grep "azureml/_base_sdk_common")
             
             # Replace 'from collections import Iterable' with 'from collections.abc import Iterable'
             if [ -f "$UTILS_FILE" ]; then
@@ -144,7 +144,7 @@ jobs:
           targetType: 'inline'
           script: |
             source venv/bin/activate
-            streamlit run app2.py \
+            python3 run app2.py \
               --experiment_name $(ml.experimentName) \
               --container_name cicd_transformers \
               --artifact_loc ./outputs/models/
