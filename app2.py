@@ -1,8 +1,7 @@
 import streamlit as st
-from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification, AutoModel
-import torch
+import joblib
 import os
-import pickle  # For saving as .pkl
+from transformers import pipeline
 from azureml.core import Workspace, Experiment
 
 # Azure ML Setup
@@ -10,78 +9,94 @@ workspace_name = "my-ml-workspace"
 subscription_id = "a22eeea6-98d6-4951-a80c-326264b6750f"
 resource_group = "my-ml-resource-group"
 
-# Initialize ws as None
-ws = None
-
 # Connect to Azure Workspace
 try:
     ws = Workspace(subscription_id=subscription_id, resource_group=resource_group, workspace_name=workspace_name)
     st.sidebar.success("Connected to Azure ML Workspace")
 except Exception as e:
+    ws = None
     st.sidebar.error(f"Error connecting to Azure ML Workspace: {e}")
 
-# Check if the workspace is initialized correctly
-if ws:
-    # Start an Experiment
-    experiment_name = "streamlit-huggingface-experiment"
-    experiment = Experiment(workspace=ws, name=experiment_name)
+# Stop execution if Azure ML connection fails
+if ws is None:
+    st.stop()
 
-    # Begin a run
-    run = experiment.start_logging(snapshot_directory=None)
+# Start an Experiment
+experiment_name = "streamlit-multiple-models"
+experiment = Experiment(workspace=ws, name=experiment_name)
+run = experiment.start_logging(snapshot_directory=None)
 
-    # Set the title of the app
-    st.title('Hugging Face Transformers with Streamlit')
+# Set the title of the app
+st.title("Streamlit with Multiple Models")
 
-    # Create a sidebar for selecting model type
-    model_type = st.sidebar.selectbox(
-        "Select a Task", 
-        ("Sentiment Analysis", "Text Generation", "Named Entity Recognition")
-    )
+# Define model paths and create a single pickle file
+model_dir = "outputs/models/"
+os.makedirs(model_dir, exist_ok=True)
+pickle_file = os.path.join(model_dir, "multiple_models.pkl")
 
-    # Load the appropriate model and tokenizer based on the selected task
-    if model_type == "Sentiment Analysis":
-        model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-    elif model_type == "Text Generation":
-        model_name = "gpt2"
-        model = AutoModel.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-    elif model_type == "Named Entity Recognition":
-        model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+# Define models and save to a pickle file
+models = {
+    "Sentiment Analysis": pipeline("sentiment-analysis"),
+    "Text Generation": pipeline("text-generation"),
+    "Named Entity Recognition": pipeline("ner")
+}
+joblib.dump(models, pickle_file)
+run.log("Models Saved", True)
 
-    # Save the model and tokenizer in .pkl format
-    model_dir = 'outputs/models/'
-    os.makedirs(model_dir, exist_ok=True)
+# Load the saved models
+models = joblib.load(pickle_file)
 
-    # Save tokenizer and model separately
-    tokenizer_path = os.path.join(model_dir, "tokenizer.pkl")
-    model_path = os.path.join(model_dir, "model.pkl")
+# Streamlit interface
+model_type = st.sidebar.selectbox(
+    "Select a Model",
+    list(models.keys())
+)
 
-    with open(tokenizer_path, 'wb') as f:
-        pickle.dump(tokenizer, f)
+st.write(f"### Selected Model: {model_type}")
 
-    with open(model_path, 'wb') as f:
-        pickle.dump(model, f)
+# Text input for predictions
+user_input = st.text_area("Enter your text here:", height=150)
 
-    # Log model paths to Azure ML
-    run.log("Tokenizer Path", tokenizer_path)
-    run.log("Model Path", model_path)
+if st.button("Analyze Text"):
+    if user_input:
+        with st.spinner("Processing... Please wait."):
+            model = models[model_type]
+            if model_type == "Sentiment Analysis":
+                result = model(user_input)
+                sentiment = result[0]["label"]
+                confidence = result[0]["score"]
+                st.write(f"### Sentiment: {sentiment}")
+                st.write(f"**Confidence Score**: {confidence:.4f}")
+                run.log("Sentiment", sentiment)
+                run.log("Confidence", confidence)
 
-    st.sidebar.success(f"Model and tokenizer saved in {model_dir}")
+            elif model_type == "Text Generation":
+                result = model(user_input, max_length=50, num_return_sequences=1)
+                generated_text = result[0]["generated_text"]
+                st.write(f"### Generated Text:")
+                st.write(generated_text)
+                run.log("Generated Text Length", len(generated_text))
 
-    # Complete the Azure ML run
-    run.complete()
+            elif model_type == "Named Entity Recognition":
+                result = model(user_input)
+                st.write("### Named Entities Found:")
+                for entity in result:
+                    st.write(f"- **Entity**: {entity['word']} | **Label**: {entity['entity']} | **Score**: {entity['score']:.4f}")
+                run.log("Number of Entities", len(result))
 
-    st.markdown(
-        """
-        ---
-        This app is powered by [Hugging Face Transformers](https://huggingface.co/transformers/), 
-        [Streamlit](https://streamlit.io/), and [Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/).
-        """
-    )
+    else:
+        st.warning("Please enter some text for analysis.")
 
-else:
-    st.sidebar.error("Failed to connect to Azure ML Workspace. Please check the credentials.")
+# Complete the run
+run.complete()
+
+# Footer
+st.markdown(
+    """
+    ---
+    Powered by [Streamlit](https://streamlit.io/), 
+    [Hugging Face Transformers](https://huggingface.co/transformers/), 
+    and [Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/).
+    """
+)
+
