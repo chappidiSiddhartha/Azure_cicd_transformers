@@ -140,7 +140,7 @@ jobs:
            endpoint_name: $endpoint_name
            model:
              path: /home/vsts/work/1/s
-          
+             unpack: true
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
