@@ -51,6 +51,7 @@ jobs:
          script: |
            # Remove conflicting Azure CLI extensions (azure-cli-ml and ml)
            source venv/bin/activate
+           az upgrade
            az extension remove -n azure-cli-ml || true
            az extension remove -n ml || true
 
@@ -86,6 +87,7 @@ jobs:
            # Ensure the correct version of the Azure ML extension is installed
            az extension remove -n azure-cli-ml || true
            az extension add -n ml --version=2.25.0 --allow-preview
+           az upgrade
 
 
      - task: AzureCLI@2
@@ -132,6 +134,7 @@ jobs:
          targetType: 'inline'
          script: |
            source venv/bin/activate
+
            python3 app2.py \
              --experiment_name $(ml.experimentName) \
              --container_name cicd_transformers \
@@ -144,6 +147,7 @@ jobs:
          scriptType: 'bash'
          scriptLocation: 'inlineScript'
          inlineScript: |
+           az upgrade
            az ml model register --name transformer_cicd1 \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
