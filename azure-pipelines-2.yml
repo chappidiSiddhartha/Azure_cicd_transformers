@@ -90,6 +90,8 @@ jobs:
                 path: $model_path
             resources:
               instance_count: $instance_count
+              ports:
+                - "8501"
             EOF
 
             # Output message to show the generated file
