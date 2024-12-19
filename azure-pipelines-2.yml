@@ -52,7 +52,7 @@ jobs:
 
 
            # Create the endpoint
-           az ml online-endpoint update --name $endpoint_name \
+           az ml online-endpoint create --name $endpoint_name \
              --resource-group $(ml.resourceGroup) \
              --workspace-name $(ml.workspace)
 
