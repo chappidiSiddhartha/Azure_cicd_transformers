@@ -33,7 +33,7 @@ jobs:
             pip install --upgrade pip
             
             # Install dependencies
-            pip install streamlit transformers torch azureml-sdk==1.0.23
+            pip install streamlit transformers torch 
 
       - task: Bash@3
         displayName: 'Fix Azure ML SDK ImportError'
