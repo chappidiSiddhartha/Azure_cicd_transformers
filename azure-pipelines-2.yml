@@ -114,6 +114,7 @@ jobs:
            pwd
            echo "Items in the current workspace:"
            ls -la
+           ls -l .
 
            # Create the deploy.yml file dynamically
            echo "Creating deploy.yml file..."
