@@ -60,7 +60,7 @@ jobs:
 
             # Install pytest and pytest-cov for testing
             pip install pytest pytest-cov
-            pip install streamlit transformers torch
+            pip install streamlit transformers torch joblib
 
 
             # Install dependencies from requirements.txt
