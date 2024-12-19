@@ -113,7 +113,7 @@ jobs:
           targetType: 'inline'
           script: |
             source venv/bin/activate
-            python3 app2.py \
+            streamlit run app2.py \
               --experiment_name $(ml.experimentName) \
               --container_name cicd_transformers \
               --artifact_loc ./outputs/models/
