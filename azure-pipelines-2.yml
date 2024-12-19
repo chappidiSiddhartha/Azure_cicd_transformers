@@ -139,7 +139,7 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: /home/vsts/work/1/s
+             path: /home/vsts/work/1/s/model_archive.tar.gz 
              unpack: true 
            code_configuration:
              code: ./  # Path to your application code
