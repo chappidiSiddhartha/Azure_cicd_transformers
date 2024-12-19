@@ -121,9 +121,11 @@ jobs:
            \$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
            name: streamlit-deployment
            endpoint_name: $endpoint_name
+           variables:
+            unpack: true
            model:
              path : pwd
-             unpack: true
+             unpack: ${{ variables.unpack }}
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
