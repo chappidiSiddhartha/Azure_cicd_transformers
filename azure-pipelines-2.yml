@@ -46,24 +46,30 @@ jobs:
               --workspace-name $(ml.workspace)
 
       - task: AzureCLI@2
+
+      - task: AzureCLI@2
         inputs:
-          azureSubscription: nlp_cicd
-          scriptType: bash
-          scriptLocation: inlineScript
+          azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
           inlineScript: |
             # Activate virtual environment
             source venv/bin/activate
 
+
             # Set variables
-            environment_name="azureml:env_cicd3:1"
+            endpoint_name="streamlit-endpoint"
+            model_name="transformer_cicd"
+            model_version="16"
+            model_path="azureml:transformer_cicd:19"  
+            environment_name="azureml:env_cicd3:1"      
             scoring_script="score.py"
             condafile="conda.yaml"
+            instance_type="ACI"
             instance_count=1
             cpu_allocation=1
             memory_allocation=0.5
-            endpoint_name="streamlit-endpoint"
-            model_path="azureml:transformer_cicd:19"
-            instance_type="Standard_DS3_v2"
+
 
             # Confirm Azure CLI login
             echo "Verifying Azure CLI login..."
@@ -73,28 +79,36 @@ jobs:
               exit 1
             fi
 
+
             # Create the deploy.yml file dynamically
             echo "Creating deploy.yml file..."
             cat <<EOF > ./deploy.yml
-            \$schema: https://azuremlschemas.azureedge.net/latest/onlineEndpoint.schema.json
-            compute: $instance_type
+            \$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
             name: streamlit-deployment
+            endpoint_name: $endpoint_name
+            model:
+              path: $model_path #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
             code_configuration:
-              code: ./
-              scoring_script: $scoring_script
-            environment:
+              code: ./  # Path to your application code
+              scoring_script: $scoring_script  # Entry point of your Streamlit app
+            environment: #$environment_name
               conda_file: conda.yaml
               image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
+              
+                # Path to the Conda environment file
+            instance_type: $instance_type  # Use Azure Container Instances
+            instance_count: $instance_count  # Number of instances
+
 
             EOF
+
 
             # Output message to show the generated file
             echo "deploy.yml file has been generated."
 
-            # Submit the job using az ml job create
-            echo "Submitting the job using az ml job create..."
-            az ml online-endpoint create  --file ./deploy.yml \
-              --resource-group my-ml-resource-group \
-              --workspace-name my-ml-workspace
 
-          
+            # Deploy the model using the generated deploy.yml
+            echo "Creating Azure ML online deployment..."
+            az ml online-deployment create --file ./deploy.yml \
+              --resource-group $(ml.resourceGroup) \
+              --workspace-name $(ml.workspace)          
