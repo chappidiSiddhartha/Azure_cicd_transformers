@@ -9,6 +9,7 @@ jobs:
           versionSpec: "3.12"
           addToPath: true
           architecture: x64
+
       - task: Bash@3
         inputs:
           targetType: inline
@@ -20,137 +21,84 @@ jobs:
             # Install specific version of Azure CLI
             pip install azure-cli==2.20.0
 
-
             # Upgrade Azure ML SDK
             pip install ruamel.yaml
             # Install pytest and pytest-cov for testing
             pip install pytest pytest-cov
             pip install streamlit transformers torch
+
       - task: AzureCLI@2
         inputs:
           azureSubscription: nlp_cicd
           scriptType: bash
           scriptLocation: inlineScript
-          inlineScript: >
+          inlineScript: |
             source venv/bin/activate
-
             az extension add -n ml --version 2.25.0 --allow-preview
 
-
-
             # Set variables for the model and endpoint
-
             endpoint_name="streamlit-endpoint"
-
             model_uri="azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models"
 
-
-
             # Create the endpoint
-
             az ml online-endpoint update --name $endpoint_name \
               --resource-group $(ml.resourceGroup) \
               --workspace-name $(ml.workspace)
+
       - task: AzureCLI@2
         inputs:
           azureSubscription: nlp_cicd
           scriptType: bash
           scriptLocation: inlineScript
-          inlineScript: >
+          inlineScript: |
             # Activate virtual environment
-
             source venv/bin/activate
 
-
-
             # Set variables
-
-            endpoint_name="streamlit-endpoint"
-
-            #model_name="transformer_cicd"
-
-            #model_version="16"
-                 #"azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
-            environment_name="azureml:env_cicd3:1"       #"azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/environments/env_cicd2/versions/1"
-
-            #docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
-
+            environment_name="azureml:env_cicd3:1"
             scoring_script="score.py"
-
             condafile="conda.yaml"
-
-            instance_type="ACI"
-
             instance_count=1
-
             cpu_allocation=1
-
             memory_allocation=0.5
-
-
+            endpoint_name="streamlit-endpoint"
+            model_path="azureml:transformer_cicd:19"
+            instance_type="Standard_DS3_v2"
 
             # Confirm Azure CLI login
-
             echo "Verifying Azure CLI login..."
-
             az account show > /dev/null 2>&1
-
             if [ $? -ne 0 ]; then
               echo "Azure CLI is not logged in. Please check your service connection."
               exit 1
             fi
 
-
-
             # Create the deploy.yml file dynamically
-
             echo "Creating deploy.yml file..."
-
             cat <<EOF > ./deploy.yml
-
             \$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-
             command: >-
-               python $scoring_script
-
+              python $scoring_script
             name: streamlit-deployment
-
-            endpoint_name: $endpoint_name
-
-            inputs:
-             model_path:
-               type: uri_folder
-               path: azureml:transformer_cicd:19    
-              #path: azureml:/subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/providers/Microsoft.MachineLearningServices/workspaces/my-ml-workspace/models/transformer_cicd/versions/19  #azureml:/subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/providers/Microsoft.MachineLearningServices/workspaces/my-ml-workspace/models/transformer_cicd/versions/19
-
-              
-
-            environment: #$environment_name
+            environment:
               conda_file: conda.yaml
               image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
-             
-                # Path to the Conda environment file
-            instance_type: $instance_type  # Use Azure Container Instances
-
-            instance_count: $instance_count  # Number of instances
-
-
-
+            code: ./  # Path to the application code directory
+            inputs:
+              model_path:
+                type: uri_folder
+                path: $model_path
+            resources:
+              instance_count: $instance_count
             EOF
 
-
-
             # Output message to show the generated file
-
             echo "deploy.yml file has been generated."
 
-
-
-            # Deploy the model using the generated deploy.yml
-
-            echo "Creating Azure ML online deployment..."
-
+            # Submit the job using az ml job create
+            echo "Submitting the job using az ml job create..."
             az ml job create --file ./deploy.yml \
-              --set model.path=azureml:transformer_cicd:19 \
-              --resource-group $(ml.resourceGroup) \
-              --workspace-name $(ml.workspace)
+              --resource-group my-ml-resource-group \
+              --workspace-name my-ml-workspace
+
+          
