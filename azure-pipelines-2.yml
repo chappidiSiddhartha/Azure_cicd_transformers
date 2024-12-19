@@ -48,7 +48,13 @@ jobs:
             STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
             CONTAINER_NAME="azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173"
             BLOB_NAME="LocalUpload/c52c5c2b7e197d2d2154e29cc8a81dd1/models/multiple_models.pkl"
-            DEST_PATH="/home/vsts/work/1/s/multiple_models.pkl"  # Local destination path
+            DEST_PATH="/home/vsts/work/1/s"  # Local destination path
+
+            # Check if the 'models' directory exists, and create it if not
+            if [ ! -d "$DEST_PATH/models" ]; then
+              echo "Creating models directory inside $DEST_PATH..."
+              mkdir -p $DEST_PATH/models
+            fi
 
             # Get Storage Account Key
             STORAGE_ACCOUNT_KEY=$(az storage account keys list \
@@ -57,15 +63,22 @@ jobs:
               --query '[0].value' \
               --output tsv)
 
-            # Download the model to your local PWD
+            # Download the model to your local models directory
             az storage blob download \
               --account-name $STORAGE_ACCOUNT_NAME \
               --account-key $STORAGE_ACCOUNT_KEY \
               --container-name $CONTAINER_NAME \
               --name $BLOB_NAME \
-              --file $DEST_PATH
+              --file $DEST_PATH/models/$(basename $BLOB_NAME)
 
-            echo "Model downloaded to: $DEST_PATH"
+            echo "Model downloaded to: $DEST_PATH/models"
+
+            # Compress the 'models' directory into a tar.gz archive
+            echo "Compressing the models directory into a tar.gz archive..."
+            tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models
+
+            echo "Model compressed to $DEST_PATH/model_archive.tar.gz"
+
    
            # Set variables for the model and endpoint
            endpoint_name="streamlit-endpoint1"
@@ -123,7 +136,9 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: /home/vsts/work/1/s  #azureml://locations/eastus/workspaces/5480ee6b-5d12-4f13-a070-1f6d366ad173/models/transformer_cicd/versions/2        #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
+             path: /home/vsts/work/1/s
+             unpack: true 
+              #azureml://locations/eastus/workspaces/5480ee6b-5d12-4f13-a070-1f6d366ad173/models/transformer_cicd/versions/2        #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
