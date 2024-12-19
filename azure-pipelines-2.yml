@@ -1,52 +1,9 @@
 jobs:
   - job: DeployStreamlitApp
-    displayName: Deploy Streamlit App to Azure Container Instances
+    displayName: 'Deploy Streamlit App to Azure'
     pool:
-      vmImage: ubuntu-latest
+      vmImage: 'ubuntu-latest'
     steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "3.12"
-          addToPath: true
-          architecture: x64
-
-      - task: Bash@3
-        inputs:
-          targetType: inline
-          script: |
-            python -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install azure-cli azureml-sdk[cli]
-            # Install specific version of Azure CLI
-            pip install azure-cli==2.20.0
-
-            # Upgrade Azure ML SDK
-            pip install ruamel.yaml
-            # Install pytest and pytest-cov for testing
-            pip install pytest pytest-cov
-            pip install streamlit transformers torch
-
-      - task: AzureCLI@2
-        inputs:
-          azureSubscription: nlp_cicd
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-            source venv/bin/activate
-            az extension add -n ml --version 2.25.0 --allow-preview
-
-            # Set variables for the model and endpoint
-            endpoint_name="streamlit-endpoint"
-            model_uri="azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models"
-
-            # Create the endpoint
-            az ml online-endpoint update --name $endpoint_name \
-              --resource-group $(ml.resourceGroup) \
-              --workspace-name $(ml.workspace)
-
-     
-
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
@@ -55,7 +12,6 @@ jobs:
           inlineScript: |
             # Activate virtual environment
             source venv/bin/activate
-
 
             # Set variables
             endpoint_name="streamlit-endpoint"
@@ -70,7 +26,6 @@ jobs:
             cpu_allocation=1
             memory_allocation=0.5
 
-
             # Confirm Azure CLI login
             echo "Verifying Azure CLI login..."
             az account show > /dev/null 2>&1
@@ -78,7 +33,6 @@ jobs:
               echo "Azure CLI is not logged in. Please check your service connection."
               exit 1
             fi
-
 
             # Create the deploy.yml file dynamically
             echo "Creating deploy.yml file..."
@@ -98,17 +52,12 @@ jobs:
                 # Path to the Conda environment file
             instance_type: $instance_type  # Use Azure Container Instances
             instance_count: $instance_count  # Number of instances
-
-
             EOF
-
 
             # Output message to show the generated file
             echo "deploy.yml file has been generated."
 
-
             # Deploy the model using the generated deploy.yml
             echo "Creating Azure ML online deployment..."
             az ml online-deployment create --file ./deploy.yml \
-              --resource-group $(ml.resourceGroup) \
-              --workspace-name $(ml.workspace)          
+              --resource-group $(ml.resourceGrou
