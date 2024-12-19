@@ -126,7 +126,7 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: https://mymlworkspace15396310889.blob.core.windows.net/azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173/LocalUpload/c52c5c2b7e197d2d2154e29cc8a81dd1/models/multiple_models.pkl  #azureml://locations/eastus/workspaces/5480ee6b-5d12-4f13-a070-1f6d366ad173/models/transformer_cicd/versions/2        #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
+             path: /home/vsts/work/1/s  #azureml://locations/eastus/workspaces/5480ee6b-5d12-4f13-a070-1f6d366ad173/models/transformer_cicd/versions/2        #azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
