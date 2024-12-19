@@ -43,9 +43,9 @@ jobs:
             # Activate the virtual environment
             source venv/bin/activate
             echo "Listing all files and folders in the venv directory:"
-            ls -R venv
+            ls -R venv/lib/python3.12/site-packages/azureml/_base_sdk_common
             # Locate utils.py in the Azure ML SDK installation
-            UTILS_FILE=$(find venv/lib/python3.12/site-packages -type f -name "utils.py" | grep "azureml/_base_sdk_common")
+            UTILS_FILE=$(find venv/lib/python3.12/site-packages/azureml/_base_sdk_common -type f -name "utils.py" | grep "azureml/_base_sdk_common")
             
             # Replace 'from collections import Iterable' with 'from collections.abc import Iterable'
             if [ -f "$UTILS_FILE" ]; then
