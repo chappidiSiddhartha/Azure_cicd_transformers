@@ -93,7 +93,7 @@ jobs:
 
 
            # Set variables
-           endpoint_name="streamlit-endpoint"
+           endpoint_name="streamlit-endpoint1"
            model_name="transformer_cicd"
            model_version="16"
                 #"azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
