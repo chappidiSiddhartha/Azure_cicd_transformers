@@ -42,7 +42,8 @@ jobs:
           script: |
             # Activate the virtual environment
             source venv/bin/activate
-
+            echo "Listing all files and folders in the venv directory:"
+            ls -R venv
             # Locate utils.py in the Azure ML SDK installation
             UTILS_FILE=$(find venv -type f -name "utils.py" | grep "azureml/_base_sdk_common")
             
@@ -53,6 +54,36 @@ jobs:
             else
               echo "utils.py file not found in the expected location"
             fi
+
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Remove conflicting Azure CLI extensions (azure-cli-ml and ml)
+            source venv/bin/activate
+            az extension remove -n azure-cli-ml || true
+            az extension remove -n ml || true
+
+
+            # Install the required Azure ML extension with a specific version
+            az extension add -n ml --version=2.25.0 --allow-preview
+
+
+            # Install specific version of Azure CLI
+            pip install azure-cli==2.20.0
+
+
+            # Upgrade Azure ML SDK
+            pip install --upgrade azureml-sdk[cli]
+
+
+            # Install pytest and pytest-cov for testing
+            pip install pytest pytest-cov
+            pip install streamlit transformers torch
+
+
+            # Install dependencies from requirements.txt
+            #pip install -r requirements.txt
 
       - task: AzureCLI@2
         inputs:
