@@ -35,25 +35,6 @@ jobs:
             # Install dependencies
             pip install streamlit transformers torch 
 
-      - task: Bash@3
-        displayName: 'Fix Azure ML SDK ImportError'
-        inputs:
-          targetType: 'inline'
-          script: |
-            # Activate the virtual environment
-            source venv/bin/activate
-            echo "Listing all files and folders in the venv directory:"
-            ls -R venv/lib/python3.12/site-packages
-            # Locate utils.py in the Azure ML SDK installation
-            UTILS_FILE=$(find venv/lib/python3.12/site-packages -type f -name "utils.py" | grep "azureml/_base_sdk_common")
-            
-            # Replace 'from collections import Iterable' with 'from collections.abc import Iterable'
-            if [ -f "$UTILS_FILE" ]; then
-              sed -i "s/from collections import Iterable/from collections.abc import Iterable/g" "$UTILS_FILE"
-              echo "Fixed ImportError in $UTILS_FILE"
-            else
-              echo "utils.py file not found in the expected location"
-            fi
 
       - task: Bash@3
         inputs:
@@ -84,7 +65,25 @@ jobs:
 
             # Install dependencies from requirements.txt
             #pip install -r requirements.txt
-
+      - task: Bash@3
+        displayName: 'Fix Azure ML SDK ImportError'
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Activate the virtual environment
+            source venv/bin/activate
+            echo "Listing all files and folders in the venv directory:"
+            ls -R venv/lib/python3.12/site-packages
+            # Locate utils.py in the Azure ML SDK installation
+            UTILS_FILE=$(find venv -type f -name "utils.py" | grep "azureml/_base_sdk_common")
+            
+            # Replace 'from collections import Iterable' with 'from collections.abc import Iterable'
+            if [ -f "$UTILS_FILE" ]; then
+              sed -i "s/from collections import Iterable/from collections.abc import Iterable/g" "$UTILS_FILE"
+              echo "Fixed ImportError in $UTILS_FILE"
+            else
+              echo "utils.py file not found in the expected location"
+            fi
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'nlp_cicd'
