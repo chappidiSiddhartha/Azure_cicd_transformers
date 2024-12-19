@@ -139,8 +139,8 @@ jobs:
            name: streamlit-deployment
            endpoint_name: $endpoint_name
            model:
-             path: model_archive.tar.gz
-             unpack: true 
+             path: /home/vsts/work/1/s
+          
            code_configuration:
              code: ./  # Path to your application code
              scoring_script: $scoring_script  # Entry point of your Streamlit app
