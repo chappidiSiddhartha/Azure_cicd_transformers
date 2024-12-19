@@ -124,7 +124,7 @@ jobs:
            variables:
             unpack: true
            model:
-             path : pwd
+             path : /home/vsts/work/1/s
              unpack: ${{ variables.unpack }}
            code_configuration:
              code: ./  # Path to your application code
