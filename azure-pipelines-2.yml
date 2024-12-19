@@ -44,7 +44,31 @@ jobs:
          inlineScript: |
            source venv/bin/activate
            az extension add -n ml --version 2.25.0 --allow-preview
+           # Set variables for your storage account and container
+            STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
+            CONTAINER_NAME="azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173"
+            BLOB_NAME="LocalUpload/c52c5c2b7e197d2d2154e29cc8a81dd1/models/multiple_models.pkl"
+            DEST_PATH="/home/vsts/work/1/s/multiple_models.pkl"  # Local destination path
 
+            # Get Storage Account Key
+            STORAGE_ACCOUNT_KEY=$(az storage account keys list \
+              --resource-group my-resource-group \
+              --account-name $STORAGE_ACCOUNT_NAME \
+              --query '[0].value' \
+              --output tsv)
+
+            # Download the model to your local PWD
+            az storage blob download \
+              --account-name $STORAGE_ACCOUNT_NAME \
+              --account-key $STORAGE_ACCOUNT_KEY \
+              --container-name $CONTAINER_NAME \
+              --name $BLOB_NAME \
+              --file $DEST_PATH
+
+            echo "Model downloaded to: $DEST_PATH"
+
+   
+   
 
            # Set variables for the model and endpoint
            endpoint_name="streamlit-endpoint1"
