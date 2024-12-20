@@ -70,13 +70,13 @@ if st.button("Analyze Text"):
     if user_input:
         with st.spinner("Processing... Please wait."):
             model = models[model_type]
-            if model_type == "Text Generation":
+            if model_type == "Text_Generation":
                 result = model(user_input, max_length=50, num_return_sequences=1)
                 generated_text = result[0]["generated_text"]
                 st.write(f"### Generated Text:")
                 st.write(generated_text)
 
-            elif model_type == "Named Entity Recognition":
+            elif model_type == "Named_Entity_Recognition":
                 result = model(user_input)
                 st.write("### Named Entities Found:")
                 for entity in result:
