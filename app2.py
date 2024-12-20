@@ -22,10 +22,6 @@ except Exception as e:
 if ws is None:
     st.stop()
 
-# Start an Experiment
-experiment_name = "streamlit-multiple-models"
-experiment = Experiment(workspace=ws, name=experiment_name)
-run = experiment.start_logging(snapshot_directory=None)
 
 # Set the title of the app
 st.title("Streamlit with Multiple Models")
@@ -107,8 +103,6 @@ if st.button("Analyze Text"):
     else:
         st.warning("Please enter some text for analysis.")
 
-# Complete the run
-run.complete()
 
 # Footer
 st.markdown(
