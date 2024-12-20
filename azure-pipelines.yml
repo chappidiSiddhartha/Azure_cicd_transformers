@@ -139,7 +139,7 @@ jobs:
            python3 app2.py \
              --experiment_name $(ml.experimentName) \
              --container_name cicd_transformers \
-             --artifact_loc ./outputs/models/
+             --artifact_loc ./outputs/pickle_files/
 
 
      - task: AzureCLI@2
@@ -149,11 +149,10 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            az upgrade
-           tar -czv --gzip --options gzip:compression-level=9 -f transformer_model.tar.gz -C ./outputs/models/ .
-           az ml model create --name transformer_cicd1 \
+           az ml model create --name transformer_cicd2 \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
-             --path transformer_model.tar.gz \
+             --path ./outputs/compressed_files/ \
              --tag "model"="Transformer2" \
              --set unpack=true
 
