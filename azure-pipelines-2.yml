@@ -1,33 +1,30 @@
-
 jobs:
- - job: DeployStreamlitApp
-   displayName: 'Deploy Streamlit App to Azure Container Instances'
-   pool:
-     vmImage: 'ubuntu-latest'
+  - job: DeployStreamlitApp
+    displayName: 'Deploy Streamlit App to Azure Container Instances'
+    pool:
+      vmImage: 'ubuntu-latest'
 
+    steps:
+      # Set up Python version
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.12'
+          addToPath: true
+          architecture: 'x64'
 
-   steps:
-     # Set up Python version
-     - task: UsePythonVersion@0
-       inputs:
-         versionSpec: '3.12'
-         addToPath: true
-         architecture: 'x64'
+      # Install required dependencies and Azure CLI tools
 
-
-     # Install required dependencies and Azure CLI tools
-
-     # Authenticate with Azure and create the endpoint
-     - task: AzureCLI@2
-       inputs:
-         azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
-         scriptType: 'bash'
-         scriptLocation: 'inlineScript'
-         inlineScript: |
-          python -m venv venv 
-          source venv/bin/activate
-           az extension add -n ml --version 2.25.0 --allow-preview
-           # Set variables for your storage account and container
+      # Authenticate with Azure and create the endpoint
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            python -m venv venv 
+            source venv/bin/activate
+            az extension add -n ml --version 2.25.0 --allow-preview
+            # Set variables for your storage account and container
             STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
             CONTAINER_NAME="azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173"
             BLOB_NAME="LocalUpload/c52c5c2b7e197d2d2154e29cc8a81dd1/models/multiple_models.pkl"
@@ -62,119 +59,82 @@ jobs:
 
             echo "Model compressed to $DEST_PATH/model_archive.tar.gz"
 
-   
-           # Set variables for the model and endpoint
-           endpoint_name="streamlit-endpoint1"
-           model_uri="azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models"
+            # Set variables for the model and endpoint
+            endpoint_name="streamlit-endpoint1"
+            model_uri="azureml://subscriptions/a22eeea6-98d6-4951-a80c-326264b6750f/resourceGroups/my-ml-resource-group/workspaces/my-ml-workspace/datastores/workspaceblobstore/paths/LocalUpload/218cca5e53b658f006af17f0096a8f66/models"
 
-           echo "Current working directory:"
-           pwd
-           echo "Items in the current workspace:"
-           ls -la
-           # Create the endpoint
-           az ml online-endpoint update --name $endpoint_name \
-             --resource-group $(ml.resourceGroup) \
-             --workspace-name $(ml.workspace)
-            - task: Bash@3
-              inputs:
-                targetType: 'inline'
-                script: |
-                  # Write your commands here
-                  #!/bin/bash
-                  
-                  # Path to the target file
-                  FILE_PATH="/opt/az/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py"
-                  
-                  # Verify the file exists
-                  if [ ! -f "$FILE_PATH" ]; then
-                      echo "File not found: $FILE_PATH"
-                      exit 1
-                  fi
-                  
-                  echo "File found: $FILE_PATH"
-                  
-                  # Check if 'debug' variable is defined
-                  if ! grep -q "debug =" "$FILE_PATH"; then
-                      echo "'debug' variable not found. Adding 'debug = False' at the top of the file..."
-                      sed -i '1i\debug = False' "$FILE_PATH"
-                      echo "'debug = False' has been added globally."
-                  else
-                      echo "'debug' variable exists. Ensuring it has a value..."
-                      # Ensure 'debug' has a value (default to False if undefined)
-                      sed -i 's/^debug *= *$/debug = False/' "$FILE_PATH"
-                      echo "'debug' variable has been ensured to have a value."
-                  fi
-     # Create dynamic deploy.yml file and deploy model
-     - task: AzureCLI@2
-       inputs:
-         azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
-         scriptType: 'bash'
-         scriptLocation: 'inlineScript'
-         inlineScript: |
-           # Activate virtual environment
-           source venv/bin/activate
+            echo "Current working directory:"
+            pwd
+            echo "Items in the current workspace:"
+            ls -la
+            # Create the endpoint
+            az ml online-endpoint update --name $endpoint_name \
+              --resource-group $(ml.resourceGroup) \
+              --workspace-name $(ml.workspace)
 
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your commands here
+            #!/bin/bash
 
-           # Set variables
-           endpoint_name="streamlit-endpoint1"
-           model_name="transformer_cicd"
-           model_version="16"
-                #"azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
-           environment_name="azureml:env_cicd3:1"       #"azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/environments/env_cicd2/versions/1"
-           #docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
-           scoring_script="score.py"
-           condafile="conda.yaml"
-           instance_type="ACI"
-           instance_count=1
-           cpu_allocation=1
-           memory_allocation=0.5
+            # Path to the target file
+            FILE_PATH="/opt/az/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py"
 
+            # Verify the file exists
+            if [ ! -f "$FILE_PATH" ]; then
+                echo "File not found: $FILE_PATH"
+                exit 1
+            fi
 
-           # Confirm Azure CLI login
-           echo "Verifying Azure CLI login..."
-           az account show > /dev/null 2>&1
-           if [ $? -ne 0 ]; then
-             echo "Azure CLI is not logged in. Please check your service connection."
-             exit 1
-           fi
-           echo "Current working directory:"
-           pwd
-           echo "Items in the current workspace:"
-           ls -la
-           ls -l .
+            echo "File found: $FILE_PATH"
 
-           # Create the deploy.yml file dynamically
-           echo "Creating deploy.yml file..."
-           cat <<EOF > ./deploy.yml
-           \$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
-           name: streamlit-deployment
-           endpoint_name: $endpoint_name
-           variables:
-            unpack: true
-           model:
-             name : azureml:transformer_cicd:3
-             unpack: ${{ variables.unpack }}
-           code_configuration:
-             code: ./  # Path to your application code
-             scoring_script: $scoring_script  # Entry point of your Streamlit app
-           environment: #$environment_name
-             conda_file: conda.yaml
-             image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
-            
-               # Path to the Conda environment file
-           instance_type: $instance_type  # Use Azure Container Instances
-           instance_count: $instance_count  # Number of instances
+            # Check if 'debug' variable is defined
+            if ! grep -q "debug =" "$FILE_PATH"; then
+                echo "'debug' variable not found. Adding 'debug = False' at the top of the file..."
+                sed -i '1i\debug = False' "$FILE_PATH"
+                echo "'debug = False' has been added globally."
+            else
+                echo "'debug' variable exists. Ensuring it has a value..."
+                # Ensure 'debug' has a value (default to False if undefined)
+                sed -i 's/^debug *= *$/debug = False/' "$FILE_PATH"
+                echo "'debug' variable has been ensured to have a value."
+            fi
 
+      # Create dynamic deploy.yml file and deploy model
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'nlp_cicd'  # Replace with Azure DevOps service connection
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            # Activate virtual environment
+            source venv/bin/activate
 
-           EOF
+            # Set variables
+            endpoint_name="streamlit-endpoint1"
+            model_name="transformer_cicd"
+            model_version="16"
+            # "azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
+            environment_name="azureml:env_cicd3:1"  # "azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/environments/env_cicd2/versions/1"
+            # docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
+            scoring_script="score.py"
+            condafile="conda.yaml"
+            instance_type="ACI"
+            instance_count=1
+            cpu_allocation=1
+            memory_allocation=0.5
 
-
-           # Output message to show the generated file
-           echo "deploy.yml file has been generated."
-
-
-           # Deploy the model using the generated deploy.yml
-           echo "Creating Azure ML online deployment..."
-           az ml online-deployment create --file ./deploy.yml \
-             --resource-group $(ml.resourceGroup) \
-             --workspace-name $(ml.workspace) 
+            # Confirm Azure CLI login
+            echo "Verifying Azure CLI login..."
+            az account show > /dev/null 2>&1
+            if [ $? -ne 0 ]; then
+              echo "Azure CLI is not logged in. Please check your service connection."
+              exit 1
+            fi
+            echo "Current working directory:"
+            pwd
+            echo "Items in the current workspace:"
+            ls -la
+          
