@@ -71,7 +71,6 @@ jobs:
             az ml online-endpoint update --name $endpoint_name \
               --resource-group $(ml.resourceGroup) \
               --workspace-name $(ml.workspace)
-
       - task: Bash@3
         inputs:
           targetType: 'inline'
@@ -95,6 +94,13 @@ jobs:
             if grep -q "debug =" "$FILE_PATH"; then
                 # Extract the value of debug if it has any value
                 debug_value=$(grep -oP "(?<=debug = ).*" "$FILE_PATH" | xargs)
+                
+                # Check if debug_value is a valid function or incomplete statement
+                if [[ "$debug_value" == *"("* && "$debug_value" != *")"* ]]; then
+                    echo "debug contains an invalid function or incomplete expression: $debug_value"
+                    echo "Setting debug to False."
+                    debug_value="False"
+                fi
                 
                 if [ -n "$debug_value" ]; then
                     # If 'debug' has a value, copy it to the top of the file and print the value
