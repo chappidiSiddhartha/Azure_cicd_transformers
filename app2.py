@@ -32,8 +32,8 @@ os.makedirs(pickle_dir, exist_ok=True)
 os.makedirs(compressed_dir, exist_ok=True)
 
 # Define paths for the pickle and tar.gz files
-pickle_file = os.path.join(pickle_dir, "multiple_models2.pkl")
-compressed_file = os.path.join(compressed_dir, "multiple_models2.tar.gz")
+pickle_file = os.path.join(pickle_dir, "multiple_models22.pkl")
+compressed_file = os.path.join(compressed_dir, "multiple_models22.tar.gz")
 
 # Define models and save to a pickle file
 models = {
