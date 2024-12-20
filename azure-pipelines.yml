@@ -152,7 +152,7 @@ jobs:
            az ml model create --name transformer_cicd2 \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
-             --path ./outputs/compressed_files/ \
+             --path ./outputs/pickle_files/ \
              --tag "model"="Transformer2" \
              --set unpack=true
 
