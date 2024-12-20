@@ -75,7 +75,29 @@ jobs:
            az ml online-endpoint update --name $endpoint_name \
              --resource-group $(ml.resourceGroup) \
              --workspace-name $(ml.workspace)
-
+     - task: Bash@3
+       inputs:
+        targetType: 'inline'
+        script: |
+          # Write your commands here#!/bin/bash
+          
+          # Locate the problematic file
+          FILE_PATH=$(find / -name "online_deployment.py" 2>/dev/null)
+          
+          if [ -z "$FILE_PATH" ]; then
+              echo "File not found."
+              exit 1
+          fi
+          
+          echo "File located at: $FILE_PATH"
+          
+          # Modify the file to add a default value for 'debug'
+          if ! grep -q "debug = " "$FILE_PATH"; then
+              sed -i '/log_and_raise_error/i\    debug = False' "$FILE_PATH"
+              echo "Added debug variable to $FILE_PATH"
+          else
+              echo "Debug variable already exists in $FILE_PATH"
+          fi
 
      # Create dynamic deploy.yml file and deploy model
      - task: AzureCLI@2
