@@ -27,7 +27,7 @@ jobs:
             # Set variables for your storage account and container
             STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
             CONTAINER_NAME="azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173"
-            BLOB_NAME="LocalUpload/c52c5c2b7e197d2d2154e29cc8a81dd1/models/multiple_models.pkl"
+            BLOB_NAME="LocalUpload/da8458f321df3380d581442f9dca2922/models/multiple_models.pkl"
             DEST_PATH="/home/vsts/work/1/s"  # Local destination path
 
             # Check if the 'models' directory exists, and create it if not
