@@ -61,7 +61,8 @@ jobs:
             echo "Model compressed to $DEST_PATH/model_archive.tar.gz" 
             #tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models
             #find $DEST_PATH/models -type f | head -n 1500 | tar -czvf $DEST_PATH/model_archive_part1.tar.gz -T -
-            tar -cf - -C $DEST_PATH models | xz -9 -c > $DEST_PATH/model_archive.tar.xz
+            tar -cf - -C $DEST_PATH models | xz -9e -c > $DEST_PATH/model_archive.tar.xz
+
             
             # Set variables for the model and endpoint
             endpoint_name="streamlit-endpoint1"
