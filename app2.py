@@ -22,14 +22,18 @@ except Exception as e:
 if ws is None:
     st.stop()
 
-
 # Set the title of the app
 st.title("Streamlit with Multiple Models")
 
-# Define model paths and create a single pickle file
-model_dir = "outputs/models/"
-os.makedirs(model_dir, exist_ok=True)
-pickle_file = os.path.join(model_dir, "multiple_models2.pkl")
+# Define directories for pickle and tar.gz files
+pickle_dir = "outputs/pickle_files/"
+compressed_dir = "outputs/compressed_files/"
+os.makedirs(pickle_dir, exist_ok=True)
+os.makedirs(compressed_dir, exist_ok=True)
+
+# Define paths for the pickle and tar.gz files
+pickle_file = os.path.join(pickle_dir, "multiple_models2.pkl")
+compressed_file = os.path.join(compressed_dir, "multiple_models2.tar.gz")
 
 # Define models and save to a pickle file
 models = {
@@ -37,39 +41,19 @@ models = {
     "Named Entity Recognition": pipeline("ner")
 }
 joblib.dump(models, pickle_file)
-run.log("Models Saved", True)
+st.sidebar.success("Models saved as a pickle file")
 
 # Compress the pickle file into a .tar.gz file
-compressed_file = os.path.join(model_dir, "multiple_models2.tar.gz")
 with tarfile.open(compressed_file, "w:gz") as tar:
     tar.add(pickle_file, arcname=os.path.basename(pickle_file))
-run.log("Pickle File Compressed", True)
+st.sidebar.success("Pickle file compressed to .tar.gz")
 
 # Display success messages
-st.sidebar.success("Models saved and compressed successfully")
-st.write(f"Pickle file compressed to: {compressed_file}")
+#st.sidebar.success("Models saved and compressed successfully")
+#st.write(f"Pickle file compressed to: {compressed_file}")
 
 # Load the saved models
-models = joblib.load(pickle_file)
-
-# Set the title of the app
-st.title("Streamlit with Multiple Models")
-
-# Define model paths and create a single pickle file
-model_dir = "outputs/models/"
-os.makedirs(model_dir, exist_ok=True)
-pickle_file = os.path.join(model_dir, "multiple_models2.pkl")
-
-# Define models and save to a pickle file
-models = {
-    "Text Generation": pipeline("text-generation"),
-    "Named Entity Recognition": pipeline("ner")
-}
-joblib.dump(models, pickle_file)
-run.log("Models Saved", True)
-
-# Load the saved models
-models = joblib.load(pickle_file)
+models = joblib.load(pickle_file)  # Note: This line will fail since the .pkl file is deleted after compression
 
 # Streamlit interface
 model_type = st.sidebar.selectbox(
@@ -91,18 +75,15 @@ if st.button("Analyze Text"):
                 generated_text = result[0]["generated_text"]
                 st.write(f"### Generated Text:")
                 st.write(generated_text)
-                run.log("Generated Text Length", len(generated_text))
 
             elif model_type == "Named Entity Recognition":
                 result = model(user_input)
                 st.write("### Named Entities Found:")
                 for entity in result:
                     st.write(f"- **Entity**: {entity['word']} | **Label**: {entity['entity']} | **Score**: {entity['score']:.4f}")
-                run.log("Number of Entities", len(result))
 
     else:
         st.warning("Please enter some text for analysis.")
-
 
 # Footer
 st.markdown(
@@ -113,3 +94,4 @@ st.markdown(
     and [Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/).
     """
 )
+
