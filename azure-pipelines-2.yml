@@ -183,7 +183,8 @@ jobs:
             # Output message to show the generated file
             echo "deploy.yml file has been generated."
 
-
+            echo "Items in the current workspace:"
+            ls -la
             # Deploy the model using the generated deploy.yml
             echo "Creating Azure ML online deployment..."
             az ml online-deployment create --file ./deploy.yml \
