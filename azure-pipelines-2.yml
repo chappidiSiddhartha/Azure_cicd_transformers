@@ -38,7 +38,7 @@ jobs:
 
             # Get Storage Account Key
             STORAGE_ACCOUNT_KEY=$(az storage account keys list \
-              --resource-group my-resource-group \
+              --resource-group $(ml.resourceGroup) \
               --account-name $STORAGE_ACCOUNT_NAME \
               --query '[0].value' \
               --output tsv)
