@@ -149,12 +149,13 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            az upgrade
-           
+           tar -czv --gzip --options gzip:compression-level=9 -f transformer_model.tar.gz -C ./outputs/models/ .
            az ml model create --name transformer_cicd1 \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
-             --path ./outputs/models/ \
-             --tag "model"="Transformer2"
+             --path transformer_model.tar.gz \
+             --tag "model"="Transformer2" \
+             --set unpack=true
 
 
      - task: CopyFiles@2
