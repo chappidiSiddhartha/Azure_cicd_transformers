@@ -1,13 +1,14 @@
 import streamlit as st
 import joblib
 import os
+import tarfile
 from transformers import pipeline
 from azureml.core import Workspace, Experiment
 
 # Azure ML Setup
-workspace_name = "my-ml-workspace"
+workspace_name = "my-ml-workspace2"
 subscription_id = "a22eeea6-98d6-4951-a80c-326264b6750f"
-resource_group = "my-ml-resource-group"
+resource_group = "my-ml-resource-group2"
 
 # Connect to Azure Workspace
 try:
@@ -25,6 +26,35 @@ if ws is None:
 experiment_name = "streamlit-multiple-models"
 experiment = Experiment(workspace=ws, name=experiment_name)
 run = experiment.start_logging(snapshot_directory=None)
+
+# Set the title of the app
+st.title("Streamlit with Multiple Models")
+
+# Define model paths and create a single pickle file
+model_dir = "outputs/models/"
+os.makedirs(model_dir, exist_ok=True)
+pickle_file = os.path.join(model_dir, "multiple_models2.pkl")
+
+# Define models and save to a pickle file
+models = {
+    "Text Generation": pipeline("text-generation"),
+    "Named Entity Recognition": pipeline("ner")
+}
+joblib.dump(models, pickle_file)
+run.log("Models Saved", True)
+
+# Compress the pickle file into a .tar.gz file
+compressed_file = os.path.join(model_dir, "multiple_models2.tar.gz")
+with tarfile.open(compressed_file, "w:gz") as tar:
+    tar.add(pickle_file, arcname=os.path.basename(pickle_file))
+run.log("Pickle File Compressed", True)
+
+# Display success messages
+st.sidebar.success("Models saved and compressed successfully")
+st.write(f"Pickle file compressed to: {compressed_file}")
+
+# Load the saved models
+models = joblib.load(pickle_file)
 
 # Set the title of the app
 st.title("Streamlit with Multiple Models")
