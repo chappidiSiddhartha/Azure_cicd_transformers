@@ -71,7 +71,53 @@ jobs:
             az ml online-endpoint update --name $endpoint_name \
               --resource-group $(ml.resourceGroup) \
               --workspace-name $(ml.workspace)
-
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: |
+            # Write your commands here
+            
+            #!/bin/bash
+            source venv/bin/activate
+            # Variables
+            RESOURCE_GROUP="my-ml-resource-group1"        # Update with your resource group name
+            WORKSPACE_NAME="my-ml-workspace11"         # Update with your Azure ML workspace name
+            FILE_PATH_IN_WORKSPACE="ml/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py" # Path to the file in your workspace
+            LOCAL_PATH="./models/online_deployment.py"  # Local path to save the downloaded file in models folder
+            
+            # Ensure you are logged in to Azure CLI
+            
+            az login
+            az extension add -n ml --version 2.25.0 --allow-preview
+     
+            # Set the Azure ML workspace context
+            az ml workspace set --name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
+            
+            # List available datastores in the workspace
+            echo "Listing datastores in the workspace..."
+            az ml datastore list --workspace-name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
+            
+            # Create models directory if it does not exist
+            mkdir -p models
+            
+            # Download the file from the datastore
+            echo "Downloading file from the datastore..."
+            
+            az ml datastore download \
+              --workspace-name "$WORKSPACE_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "workspaceblobstore" \
+              --path "$FILE_PATH_IN_WORKSPACE" \
+              --destination "$LOCAL_PATH" \
+              --overwrite
+            
+            # Verify if the file was downloaded
+            if [ -f "$LOCAL_PATH" ]; then
+                echo "File downloaded successfully to $LOCAL_PATH"
+            else
+                echo "File download failed."
+                exit 1
+            fi
       - task: Bash@3
         inputs:
           targetType: 'inline'
@@ -113,52 +159,7 @@ jobs:
                 sed -i '1i\debug = False' "$FILE_PATH"
                 echo "'debug = False' has been added globally."
             fi
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: |
-            # Write your commands here
-            
-            #!/bin/bash
-            
-            # Variables
-            RESOURCE_GROUP="my-ml-resource-group1"        # Update with your resource group name
-            WORKSPACE_NAME="my-ml-workspace11"         # Update with your Azure ML workspace name
-            FILE_PATH_IN_WORKSPACE="ml/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py" # Path to the file in your workspace
-            LOCAL_PATH="./models/online_deployment.py"  # Local path to save the downloaded file in models folder
-            
-            # Ensure you are logged in to Azure CLI
-            az login
-            az extension add --name ml
 
-            # Set the Azure ML workspace context
-            az ml workspace set --name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
-            
-            # List available datastores in the workspace
-            echo "Listing datastores in the workspace..."
-            az ml datastore list --workspace-name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
-            
-            # Create models directory if it does not exist
-            mkdir -p models
-            
-            # Download the file from the datastore
-            echo "Downloading file from the datastore..."
-            
-            az ml datastore download \
-              --workspace-name "$WORKSPACE_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --name "workspaceblobstore" \
-              --path "$FILE_PATH_IN_WORKSPACE" \
-              --destination "$LOCAL_PATH" \
-              --overwrite
-            
-            # Verify if the file was downloaded
-            if [ -f "$LOCAL_PATH" ]; then
-                echo "File downloaded successfully to $LOCAL_PATH"
-            else
-                echo "File download failed."
-                exit 1
-            fi
       # Create dynamic deploy.yml file and deploy model
       - task: AzureCLI@2
         inputs:
