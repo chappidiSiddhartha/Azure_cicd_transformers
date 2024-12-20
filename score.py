@@ -73,14 +73,14 @@ def run(raw_data, model_type):
         data = json.loads(raw_data)
         model = models.get(model_type)
         
-        if model_type == "Text Generation":
+        if model_type == "Text_Generation":
             # Handle text generation
             result = model(data['text'], max_length=50, num_return_sequences=1)
             generated_text = result[0]["generated_text"]
             run.log("Generated Text Length", len(generated_text))
             return create_response(generated_text, model_type)
         
-        elif model_type == "Named Entity Recognition":
+        elif model_type == "Named_Entity_Recognition":
             # Handle Named Entity Recognition
             result = model(data['text'])
             entities = [{"entity": entity['entity'], "word": entity['word'], "score": entity['score']} for entity in result]
