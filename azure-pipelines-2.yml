@@ -71,43 +71,6 @@ jobs:
             az ml online-endpoint update --name $endpoint_name \
               --resource-group $(ml.resourceGroup) \
               --workspace-name $(ml.workspace)
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: |
-            # Write your commands here
-            
-            #!/bin/bash
-            source venv/bin/activate
-            # Variables
-            RESOURCE_GROUP="my-ml-resource-group1"        # Update with your resource group name
-            WORKSPACE_NAME="my-ml-workspace11"         # Update with your Azure ML workspace name
-            FILE_PATH_IN_WORKSPACE="ml/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py" # Path to the file in your workspace
-
-            # Ensure you are logged in to Azure CLI
-            az login
-            az extension add -n ml --version 2.25.0 --allow-preview
-
-            # Set the Azure ML workspace context
-            az ml workspace set --name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
-            
-            # List available datastores in the workspace (optional)
-            echo "Listing datastores in the workspace..."
-            az ml datastore list --workspace-name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
-            
-            # Open the file with vim or nano directly
-            echo "Opening file content..."
-            
-            # Check if 'vim' is installed, then use it, or fallback to 'nano'
-            if command -v vim &> /dev/null
-            then
-                vim "$FILE_PATH_IN_WORKSPACE"
-            elif command -v nano &> /dev/null
-            then
-                nano "$FILE_PATH_IN_WORKSPACE"
-            else
-                echo "Neither vim nor nano is available. Please install an editor."
-            fi
 
       - task: Bash@3
         inputs:
@@ -116,37 +79,40 @@ jobs:
             # Write your commands here
             
             #!/bin/bash
-            
+                  
             # Path to the target file
             FILE_PATH="/opt/az/azcliextensions/ml/azext_mlv2/manual/custom/online_deployment.py"
-            
+                  
             # Verify the file exists
             if [ ! -f "$FILE_PATH" ]; then
                 echo "File not found: $FILE_PATH"
                 exit 1
             fi
-            
+                  
             echo "File found: $FILE_PATH"
-            
+                  
             # Check if 'debug' variable exists and has a value
             if grep -q "debug =" "$FILE_PATH"; then
                 # Extract the value of debug if it has any value
                 debug_value=$(grep -oP "(?<=debug = ).*" "$FILE_PATH" | xargs)
-            
+                
                 if [ -n "$debug_value" ]; then
-                    # If 'debug' has a value, copy it to the top of the file
+                    # If 'debug' has a value, copy it to the top of the file and print the value
                     echo "'debug' has a value ($debug_value). Copying it to the top."
+                    echo "debug is currently set to: $debug_value"
                     # Copy the line with debug definition to the top
                     sed -i "1i\debug = $debug_value" "$FILE_PATH"
                 else
                     # If 'debug' exists but has no value, set it to False and copy it to the top
                     echo "'debug' variable found but has no value. Setting it to 'False' and copying it to the top."
+                    echo "debug is currently set to: False"
                     sed -i 's/^debug *= *$/debug = False/' "$FILE_PATH"
                     sed -i '1i\debug = False' "$FILE_PATH"
                 fi
             else
                 # If 'debug' is not defined, create it and set to False at the top
                 echo "'debug' variable not found. Adding 'debug = False' at the top..."
+                echo "debug is currently set to: False"
                 sed -i '1i\debug = False' "$FILE_PATH"
                 echo "'debug = False' has been added globally."
             fi
