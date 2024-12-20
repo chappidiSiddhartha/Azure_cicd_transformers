@@ -1,8 +1,6 @@
-
 import streamlit as st
 import joblib
 import os
-import tarfile
 from transformers import pipeline
 from azureml.core import Workspace, Experiment
 
@@ -26,35 +24,26 @@ if ws is None:
 # Set the title of the app
 st.title("Streamlit with Multiple Models")
 
-# Define directories for pickle and tar.gz files
+# Define directory for pickle files
 pickle_dir = "outputs/pickle_files/"
-compressed_dir = "outputs/compressed_files/"
 os.makedirs(pickle_dir, exist_ok=True)
-os.makedirs(compressed_dir, exist_ok=True)
 
-# Define paths for the pickle and tar.gz files
+# Define path for the pickle file
 pickle_file = os.path.join(pickle_dir, "multiple_models22.pkl")
-compressed_file = os.path.join(compressed_dir, "multiple_models22.tar.gz")
 
 # Define models and save to a pickle file
 models = {
     "Text Generation": pipeline("text-generation", model="gpt2"),  
     "Named Entity Recognition": pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english") 
 }
+
+# Save the models to the pickle file
 joblib.dump(models, pickle_file)
 st.sidebar.success("Models saved as a pickle file")
 
-# Compress the pickle file into a .tar.gz file
-with tarfile.open(compressed_file, "w:gz") as tar:
-    tar.add(pickle_file, arcname=os.path.basename(pickle_file))
-st.sidebar.success("Pickle file compressed to .tar.gz")
-
-# Display success messages
-#st.sidebar.success("Models saved and compressed successfully")
-#st.write(f"Pickle file compressed to: {compressed_file}")
-
 # Load the saved models
-models = joblib.load(pickle_file)  # Note: This line will fail since the .pkl file is deleted after compression
+models = joblib.load(pickle_file)
+st.sidebar.success("Models loaded successfully")
 
 # Streamlit interface
 model_type = st.sidebar.selectbox(
@@ -71,13 +60,13 @@ if st.button("Analyze Text"):
     if user_input:
         with st.spinner("Processing... Please wait."):
             model = models[model_type]
-            if model_type == "Text_Generation":
+            if model_type == "Text Generation":
                 result = model(user_input, max_length=50, num_return_sequences=1)
                 generated_text = result[0]["generated_text"]
                 st.write(f"### Generated Text:")
                 st.write(generated_text)
 
-            elif model_type == "Named_Entity_Recognition":
+            elif model_type == "Named Entity Recognition":
                 result = model(user_input)
                 st.write("### Named Entities Found:")
                 for entity in result:
