@@ -187,6 +187,7 @@ jobs:
 
             # Output message to show the generated file
             echo "deploy.yml file has been generated."
+            echo "Count of files: $(find . -type f | wc -l)"
 
             echo "Items in the current workspace:"
             ls -la
