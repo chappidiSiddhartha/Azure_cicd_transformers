@@ -55,7 +55,7 @@ jobs:
 
             # Compress the 'models' directory into a tar.gz archive
             echo "Compressing the models directory into a tar.gz archive..."
-            tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models
+            tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models  --gzip --best
 
             echo "Model compressed to $DEST_PATH/model_archive.tar.gz"
 
