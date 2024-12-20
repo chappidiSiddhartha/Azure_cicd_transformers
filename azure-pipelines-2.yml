@@ -125,7 +125,7 @@ jobs:
            variables:
             unpack: true
            model:
-             path : /home/vsts/work/1/s/models
+             name : azureml:transformer_cicd:3
              unpack: ${{ variables.unpack }}
            code_configuration:
              code: ./  # Path to your application code
