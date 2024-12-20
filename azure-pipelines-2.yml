@@ -129,7 +129,8 @@ jobs:
             
             # Ensure you are logged in to Azure CLI
             az login
-            
+            az extension add --name ml
+
             # Set the Azure ML workspace context
             az ml workspace set --name "$WORKSPACE_NAME" --resource-group "$RESOURCE_GROUP"
             
