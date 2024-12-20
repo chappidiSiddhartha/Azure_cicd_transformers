@@ -147,7 +147,7 @@ jobs:
             #docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
             scoring_script="score.py"
             condafile="conda.yaml"
-            instance_type="ACI"
+            instance_type="Standard_F2s_v2"
             instance_count=1
             cpu_allocation=1
             memory_allocation=0.5
