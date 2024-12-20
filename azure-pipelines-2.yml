@@ -25,9 +25,9 @@ jobs:
             source venv/bin/activate
             az extension add -n ml --version 2.25.0 --allow-preview
             # Set variables for your storage account and container
-            STORAGE_ACCOUNT_NAME="mymlworkspace15396310889"
-            CONTAINER_NAME="azureml-blobstore-5480ee6b-5d12-4f13-a070-1f6d366ad173"
-            BLOB_NAME="LocalUpload/da8458f321df3380d581442f9dca2922/models/multiple_models.pkl"
+            STORAGE_ACCOUNT_NAME="mymlworkstoragecc3b1c0c2"
+            CONTAINER_NAME="azureml-blobstore-c729e8d2-9c15-4259-bd04-38cce99054fb"
+            BLOB_NAME="LocalUpload/26253cb33d7b60bd5f200ca3ccdbce7f/models/multiple_models2.pkl"
             DEST_PATH="/home/vsts/work/1/s"  # Local destination path
 
             # Check if the 'models' directory exists, and create it if not
