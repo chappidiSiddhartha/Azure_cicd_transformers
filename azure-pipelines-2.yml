@@ -27,14 +27,14 @@ jobs:
             # Set variables for your storage account and container
             STORAGE_ACCOUNT_NAME="mymlworkstoragecc3b1c0c2"
             CONTAINER_NAME="azureml-blobstore-c729e8d2-9c15-4259-bd04-38cce99054fb"
-            BLOB_NAME="LocalUpload/26253cb33d7b60bd5f200ca3ccdbce7f/models/multiple_models2.pkl"
+            BLOB_NAME="LocalUpload/d974bcff466aba6e30595ba93d97f610/compressed_files/multiple_models2.tar.gz"
             DEST_PATH="/home/vsts/work/1/s"  # Local destination path
 
             # Check if the 'models' directory exists, and create it if not
-            if [ ! -d "$DEST_PATH/models" ]; then
-              echo "Creating models directory inside $DEST_PATH..."
-              mkdir -p $DEST_PATH/models
-            fi
+            #if [ ! -d "$DEST_PATH/models" ]; then
+              #echo "Creating models directory inside $DEST_PATH..."
+              #mkdir -p $DEST_PATH/models
+            #fi
 
             # Get Storage Account Key
             STORAGE_ACCOUNT_KEY=$(az storage account keys list \
@@ -49,19 +49,19 @@ jobs:
               --account-key $STORAGE_ACCOUNT_KEY \
               --container-name $CONTAINER_NAME \
               --name $BLOB_NAME \
-              --file $DEST_PATH/models/$(basename $BLOB_NAME)
+              --file $DEST_PATH/$(basename $BLOB_NAME)
 
-            echo "Model downloaded to: $DEST_PATH/models"
+            echo "Model downloaded to: $DEST_PATH"
 
             # Compress the 'models' directory into a tar.gz archive
-            echo "Compressing the models directory into a tar.gz archive..."
+            #echo "Compressing the models directory into a tar.gz archive..."
             #tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models  --gzip --best
             #find $DEST_PATH/models -type f | head -n 1500 | tar -czvf $DEST_PATH/model_archive_part1.tar.gz -T - 
             
-            echo "Model compressed to $DEST_PATH/model_archive.tar.gz" 
+            #echo "Model compressed to $DEST_PATH/model_archive.tar.gz" 
             #tar -czvf $DEST_PATH/model_archive.tar.gz -C $DEST_PATH models
             #find $DEST_PATH/models -type f | head -n 1500 | tar -czvf $DEST_PATH/model_archive_part1.tar.gz -T -
-            tar -cf - -C $DEST_PATH models | xz -9e -c > $DEST_PATH/model_archive.tar.xz
+            #tar -cf - -C $DEST_PATH models | xz -9e -c > $DEST_PATH/model_archive.tar.xz
 
             
             # Set variables for the model and endpoint
@@ -140,8 +140,8 @@ jobs:
 
             # Set variables
             endpoint_name="streamlit-endpoint2"
-            model_name="transformer_cicd"
-            model_version="16"
+            #model_name="transformer_cicd"
+            #model_version="16"
                   #"azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/80"
             environment_name="azureml:env_cicd3:1"       #"azureml://locations/eastus/workspaces/ad8d8e3e-4bef-458f-a002-9a776717f887/environments/env_cicd2/versions/1"
             #docker_image="ad8d8e3e4bef458fa0029a776717f887.azurecr.io/azureml/azureml_dd0ec8da2231060248d61ee3eedcb80b"
