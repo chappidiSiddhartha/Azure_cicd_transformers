@@ -138,3 +138,7 @@ jobs:
             echo "Items in the current workspace:"
             ls -la
           
+            az ml online-deployment create --file ./deploy.yml \
+              --resource-group $(ml.resourceGroup) \
+              --workspace-name $(ml.workspace) \
+              --workspace-name $(ml.workspace) 
