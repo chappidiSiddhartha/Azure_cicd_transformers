@@ -32,7 +32,7 @@ st.title("Streamlit with Multiple Models")
 # Define model paths and create a single pickle file
 model_dir = "outputs/models/"
 os.makedirs(model_dir, exist_ok=True)
-pickle_file = os.path.join(model_dir, "multiple_models.pkl")
+pickle_file = os.path.join(model_dir, "multiple_models2.pkl")
 
 # Define models and save to a pickle file
 models = {
