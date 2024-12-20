@@ -149,12 +149,12 @@ jobs:
          scriptLocation: 'inlineScript'
          inlineScript: |
            az upgrade
-           az extension add --name storage-preview
-           az ml model register --name transformer_cicd1 \
+           
+           az ml model create --name transformer_cicd1 \
              -g $(ml.resourceGroup) \
              -w $(ml.workspace) \
              --path ./outputs/models/ \
-             --tag "model"="Transformer"
+             --tag "model"="Transformer2"
 
 
      - task: CopyFiles@2
