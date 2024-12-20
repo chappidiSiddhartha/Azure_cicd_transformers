@@ -38,8 +38,8 @@ compressed_file = os.path.join(compressed_dir, "multiple_models22.tar.gz")
 
 # Define models and save to a pickle file
 models = {
-    "Text_Generation": pipeline("text-generation"),
-    "Named_Entity_Recognition": pipeline("ner")
+    "Text Generation": pipeline("text-generation", model="gpt2"),  
+    "Named Entity Recognition": pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english") 
 }
 joblib.dump(models, pickle_file)
 st.sidebar.success("Models saved as a pickle file")
