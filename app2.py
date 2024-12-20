@@ -36,7 +36,6 @@ pickle_file = os.path.join(model_dir, "multiple_models.pkl")
 
 # Define models and save to a pickle file
 models = {
-    "Sentiment Analysis": pipeline("sentiment-analysis"),
     "Text Generation": pipeline("text-generation"),
     "Named Entity Recognition": pipeline("ner")
 }
@@ -61,16 +60,7 @@ if st.button("Analyze Text"):
     if user_input:
         with st.spinner("Processing... Please wait."):
             model = models[model_type]
-            if model_type == "Sentiment Analysis":
-                result = model(user_input)
-                sentiment = result[0]["label"]
-                confidence = result[0]["score"]
-                st.write(f"### Sentiment: {sentiment}")
-                st.write(f"**Confidence Score**: {confidence:.4f}")
-                run.log("Sentiment", sentiment)
-                run.log("Confidence", confidence)
-
-            elif model_type == "Text Generation":
+            if model_type == "Text Generation":
                 result = model(user_input, max_length=50, num_return_sequences=1)
                 generated_text = result[0]["generated_text"]
                 st.write(f"### Generated Text:")
@@ -99,4 +89,3 @@ st.markdown(
     and [Azure Machine Learning](https://azure.microsoft.com/en-us/services/machine-learning/).
     """
 )
-
