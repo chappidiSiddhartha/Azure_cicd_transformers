@@ -173,9 +173,9 @@ jobs:
             code_configuration:
               code: ./  # Path to your application code
               scoring_script: $scoring_script  # Entry point of your Streamlit app
-            environment: #$environment_name
-              conda_file: conda.yaml
-              image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
+            environment: 
+              #conda_file: conda.yaml
+              image: mcr.microsoft.com/azureml/curated/docker-tools:1
               
                 # Path to the Conda environment file
             instance_type: $instance_type  # Use Azure Container Instances
