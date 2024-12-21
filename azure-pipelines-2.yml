@@ -193,7 +193,8 @@ jobs:
             ls -la
             # Deploy the model using the generated deploy.yml
             #az ml model deploy -g $(ml.resourceGroup) -w $(ml.workspace) -n $(service_name) -f multiple_models22.tar.gz --dc dc.yml --ic inferenceConfig.yml
-            az ml job create --file ./deploy.yml \
-             --resource-group my-ml-resource-group \
-             --workspace-name my-ml-workspace 
+        
+            az ml online-deployment create --file ./deploy.yml \
+            --resource-group $(ml.resourceGroup) \
+            --workspace-name $(ml.workspace)
             
