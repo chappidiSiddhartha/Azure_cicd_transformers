@@ -17,34 +17,35 @@ experiment = None
 run = None
 
 def init():
-    '''
-    Initialize the required models:
-        - Load models from a local pickle file
-    '''
     global models, prediction_dc, experiment, run
 
-    # Connect to Azure ML Workspace (Optional: can be omitted if no Azure-specific functionality is required)
     try:
         ws = Workspace(subscription_id=subscription_id, resource_group=resource_group, workspace_name=workspace_name)
         st.sidebar.success("Connected to Azure ML Workspace")
     except Exception as e:
         st.sidebar.error(f"Error connecting to Azure ML Workspace: {e}")
-        st.stop()
+        print(f"Error connecting to Azure ML Workspace: {e}")
+        raise
 
-    # Start an Experiment (Optional)
     experiment_name = "streamlit-multiple-models"
     experiment = Experiment(workspace=ws, name=experiment_name)
     run = experiment.start_logging(snapshot_directory=None)
 
-    # Define model paths and load the saved models from the pickle file
     model_dir = "outputs/pickle_files/"
     os.makedirs(model_dir, exist_ok=True)
     pickle_file = os.path.join(model_dir, "multiple_models22.pkl")
+    
+    # Debugging: Log model path existence
+    if not os.path.exists(pickle_file):
+        raise FileNotFoundError(f"Model file not found at {pickle_file}")
 
-    # Load models from the pickle file
-    global models
-    models = joblib.load(pickle_file)
-    st.sidebar.success("Models loaded successfully")
+    try:
+        models = joblib.load(pickle_file)
+        st.sidebar.success("Models loaded successfully")
+    except Exception as e:
+        print(f"Error loading models: {e}")
+        raise
+
 
 def create_response(predicted_output, model_type):
     '''
