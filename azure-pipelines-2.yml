@@ -173,7 +173,7 @@ jobs:
             code_configuration:
               code: ./  # Path to your application code
               scoring_script: $scoring_script  # Entry point of your Streamlit app
-            environment: azureml:inf_env5:2
+            environment: azureml:inf_env3:6
  
               #conda_file: conda.yaml
               #image: mcr.microsoft.com/azureml/curated/docker-tools:1
