@@ -6,9 +6,9 @@ from azureml.core import Workspace, Experiment
 import json
 
 # Azure ML Setup
-workspace_name = "my-ml-workspace"
+workspace_name = "my-ml-workspace3"
 subscription_id = "a22eeea6-98d6-4951-a80c-326264b6750f"
-resource_group = "my-ml-resource-group"
+resource_group = "my-ml-resource-group3"
 
 # Global Variables
 models = {}
